@@ -1,0 +1,90 @@
+1 login to OSU vpn using Cisco Anyconnect (full tunnel / partial tunnel)
+
+2 SSH (secure shell) into College of Engineering FLIP server (using PUTTY)
+ - in PUTTY:  "flip3.engr.oregonstate.edu" for Host Name/IP
+ 
+3 from within your OSU engineering space on GITHUB:
+ run command:
+    git clone https://github.com/luyaozh/CS290.git ./
+    to copy files from class GIT repository to your own.
+	- MIND THE DIRECTORY NAME
+ 
+4.  *a* there is a file called dbcon.js.template. Rename this to dbcon.js
+    - note:  you need to be in $PROJECT/diagnostic/ , where $PROJECT is where git clone was run
+	- edit the file thus:
+	var mysql = require('mysql');
+	var pool = mysql.createPool({
+	  connectionLimit : 10,
+	  host            : 'classmysql.engr.oregonstate.edu',
+	  user            : '[cs290_yourengrusername]',
+	  password        : '[last-4-digits-of-your-osu-id-number]',
+	  database        : '[cs290_yourengrusername]'
+	});
+
+	module.exports.pool = pool;
+					
+    *** e.g.:   ****************  
+		var mysql = require('mysql');
+		var pool = mysql.createPool({
+		  connectionLimit : 10,
+		  host            : 'classmysql.engr.oregonstate.edu',
+		  user            : 'cs290_smithj',
+		  password        : '1234',
+		  database        : 'cs290_smithj'
+		});
+
+		module.exports.pool = pool;
+    ***************************************\
+	Your flip account may need to manually install Express, Express-handlebars, 
+	mysql if you have not done it before. Under the diagnostic folder, run 
+	*********
+	npm install express
+	npm install express-handlebars
+	npm install mysql
+	****
+	will install these for you.
+	
+	*b*
+	
+	changing MYSQL password:
+	In this step, you may want to change your MySQL password to be something other than the last 4 digits of your ID
+	to make it more secure. You can skip this step if you just want to use the default password. 
+	Yu can access the administration panel at https://classmysql.engr.oregonstate.edu/ Links to an external site.
+	where you can change your password. Please use "cs290_your ONID user name" as user name and the last 
+	four digits of your OSU ID number as the initial db password, and choose server name 'classmysql'. 
+	This site can only be accessed while you are VPNed into the OSU network. Note that if you change the password,
+	you need to make the change in the dbcon.js as well. This can also be useful for troubleshooting database
+	problems as it is a graphical interface that will let you inspect the contents of your database when 
+	you might otherwise be unable to access it. If you forget the password after you change it, please 
+	email the IT support and they will reset to the default.
+	
+	5
+	
+	Since this is running on a shared machine, everyone cannot use port 3000.
+	If you look at the diagnostic.js file you will see that the port 3000 was replaced with 
+	process.argv[2]. This means it will take the argument immediately after the filename when 
+	you start Node.js and use that as the port. So running node diagnostic.js 5345 will start 
+	node running on port 5345. Everyone will need to use a unique port otherwise you will get
+	an error that the port is in use. Try a number between 3000 and 65535 till you find one that 
+	works for you (Hint: Try some random permutation of the last 4 or 5 digits of your OSU ID).
+	
+	6
+	
+	Finally is the topic of persistence. If you want to use forever there will be a few changes. 
+	You need to install it on a per application basis. So to install it for the diagnostic folder, 
+	navigate to in that folder and run npm install forever. Note that this does not use the global flag.
+
+    Then you will need to run forever by accessing the forever binary directly. 
+	So from within the diagnostic directory you would run forever using the command 
+	./node_modules/forever/bin/forever. So when before you would run forever start diagnostic.js, now you will run
+	./node_modules/forever/bin/forever start diagnostic.js 5345. So we specify the path to the forever binary and 
+	also add a port number as an argument. 
+	You could view the page being served by visiting http://flipX.engr.oregonstate.edu:5345 while you are VPNed into the OSU network.
+	
+	7
+	
+	And as a closing note, if you log into access.engr.oregonstate.edu you will randomly be put on 
+	flip1, flip2 or flip3. You can see which flip you are using the command hostname then you can 
+	switch flips by using the command ssh flipX where X is 1, 2 or 3. You need to be sure to log into 
+	the same flip every time because the node instance will only be running on one of them. So if you
+	ever run forever list and don't see your instance running it means you are probably on the wrong flip.
