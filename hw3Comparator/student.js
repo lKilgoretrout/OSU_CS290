@@ -7,6 +7,7 @@ function Student(name, major, yearInSchool, club) {
   this.club = club; // string, (e.g. "Improv", "Art")
 };
 
+
 var students = [
   new Student("Pam", "Art", 2, "Art"),
   new Student("Michael", "Business", 4, "Improv"),
@@ -17,7 +18,7 @@ var students = [
 
 ];
 
-// add the logMe function to the Student prototype:
+
 Student.prototype.logMe = function(showClub) {
 	/** 
 	 * prints Student attributes, 
@@ -87,7 +88,7 @@ those 'tied' students is not specified and either can come first*/
 /* This compares two students based on their year in school. Sort in descending order.*/
 function yearComparator(student1, student2) 
 {
-    if (Student1.yearInSchool < Student2.yearInSchool) 
+    if (student1.yearInSchool < student2.yearInSchool) 
 	{
 	    return true;
     }
@@ -118,32 +119,69 @@ It should be case insensitive. If two clubs are of equal type then the student w
 has the higher year in school should be "greater."*/
 function clubComparator(student1, student2) 
 {
-    // sort order for club types:  "improv" > "cat" > "art" > "guitar" > [any other club]
-	s1Club = Student1.club.toLowerCase(); // values put into lowercase to standardize sorting
-	s2Club = Student2.club.toLowerCase();
-	if       (s1Club == "improv")                                           {return true;}
-	else if ((s1Club == "cat") && s2Club != "improv")       				{return true;} 	
-    else if ((s1Club == "art") && s2Club != "improv"||"cat") 				{return true;}
-	else if ((s1Club == "guitar") && s2Club != "improv"||"cat"||"guitar")   {return true;}
+    // put student club in lower case and check its priority
+    let sortOrder = {improv: 1, cat: 2 , art: 3, guitar: 4};
+	let s1 = student1.club.toLowerCase();
+	let s2 = student2.club.toLowerCase();
+
+    // if student club not listed, set it at lowest priority
+	if   (s1 in sortOrder) {s1Order = sortOrder[s1]}
+	else {s1Order = 5};
+	if   (s2 in sortOrder) {s2Order = sortOrder[s2]}
+	else {s2Order = 5};
+
+	if   (s1Order < s2Order) {return false;}
+	else                     {return true;}
+	
+	// if two students have the same club, compare based on student.yearInSchool
+	if   (s1Order == s2Order) {return yearComparator(student1, student2); }
+	
+	/*  Can you believe I thought this huge mess here was a good idea ?
+	// sort order for club types:  "improv" > "cat" > "art" > "guitar" > [any other club]
+	s1Club = student1.club.toLowerCase(); // values put into lowercase to standardize sorting
+	s2Club = student2.club.toLowerCase();
+	if       (s1Club == "improv")                                           {return false;}
+	else if  (s2Club == "improv")                                           {return true;}
+	else if ((s1Club == "cat") && s2Club != "improv")       				{return false;}
+	else if ((s2Club == "cat") && s1Club != "improv")       				{return true;} 
+	 	
+    else if ((s1Club == "art") && s2Club != "improv"||"cat") 				{return false;}
+    else if ((s2Club == "art") && s1Club != "improv"||"cat") 				{return true;}
+
+	else if ((s1Club == "guitar") && s2Club != "improv"||"cat"||"art")      {return true;}
+	else if ((s2Club == "guitar") && s1Club != "improv"||"cat"||"art")      {return false;}
 	
     else if ((s1Club == ("improv"||"cat"||"art"||"guitar")) && 
-			  s2Club != ("improv"||"cat"||"art"||"guitar"))                 {return true;}  
+			  s2Club != ("improv"||"cat"||"art"||"guitar"))                 {return false;}
+	else if ((s2Club == ("improv"||"cat"||"art"||"guitar")) && 
+			  s1Club != ("improv"||"cat"||"art"||"guitar"))                 {return false;}    
 	
 	else if  (s1club === s2club) {       // if club is equal, sort by yearInSchool
 		 if (Student1.yearInSchool > Student2.yearInSchool)                 {return true;}
 		 else																{return false;}
 	}
+	*/
 };
 
 function main()
 {
-    var studentsByMajor = bubbleSort(majorComparator, students);
-	console.log(studentsByMajor);
+    
+	// students sorted by year
+	var studentsByYear = bubbleSort(yearComparator, students);
 	console.log("**********");
-	for (var student of studentsByMajor)
-	{
-		console.log(student.logMe(showClub=false));
-	}
+	for (var student of studentsByYear) { console.log(student.logMe(showClub=false)); }
+	console.log("**********");
+	
+	// students sorted by major
+	var studentsByMajor = bubbleSort(majorComparator, students);
+	console.log("**********");
+	for (var student of studentsByMajor) { console.log(student.logMe(showClub=false)); }
+	
+	// students sorted by club
+	var studentsByClub = bubbleSort(clubComparator, students);
+	console.log("**********");
+	for (var student of studentsByClub) { console.log(student.logMe(showClub=true)); }
+	console.log("**********");
 };
 	
 main();	
