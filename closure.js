@@ -1,12 +1,15 @@
 function buildList(list) {
     var result = [];
     for (var i = 0; i < list.length; i++) {
-		    result[i] = function(i) { 
-				return function() {
-					var item = 'item' + list[i];
-					alert(item + ' ' + list[i])
-				}
-			}
+        
+        result.push( 
+            function(x) {
+              return function() {
+                  var item = 'item' + list[x];
+                  alert(item + ' ' + list[x])
+              } 
+            }(i)
+        );
     }
     return result;
 }
@@ -18,3 +21,5 @@ function testList() {
         fnlist[j]();
     }
 }
+
+testList();
