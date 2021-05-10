@@ -11,15 +11,17 @@
 			    document.getElementById('submitLocation').addEventListener('click', function(event) {
 			        var req = new XMLHttpRequest();
 			        var location = document.getElementById('location').value;
-			  
+					var countryCode = location.substring(location.length-2);
+					
 			        // check if the query is a zip code:
 			        if (Number.isInteger(location.substring(0))) {
-			            var zip = location.substring(0, location.length-3);   //submit data without comma and country code
-			            req.open("GET", "http://api.openweathermap.org/data/2.5/weather?zip=$" + zip + ",us&appid=" + apiKey + "&units=imperial", true);    
+			            var zip = location.substring(0, location.length-3);   
+						
+			            req.open("GET", "http://api.openweathermap.org/data/2.5/weather?zip=" + zip + "," + countryCode + "&appid=" + apiKey + "&units=imperial", true);    
 			        } 
 					else {
-					    var city = location    //.substring(0, location.length-3);
-						req.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + city + ",us" + "&appid=" + apiKey + "&units=imperial" , true);
+					    var city = location.substring(0, location.length-3);
+						req.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&appid=" + apiKey + "&units=imperial" , true);
 		            }
 			  
 			        req.send(null);
@@ -36,6 +38,28 @@
 				            } else {
 							    document.getElementById('cap').textContent = "The weather in ... " + zip;  
 						    }
+						}
+						else {
+				            console.log("Error in network request: " + req.statusText);
+			            }
+				    }});
+					event.preventDefault();
+				});
+				
+				document.getElementById('submitString').addEventListener('click', function(event) {
+			        var req = new XMLHttpRequest();
+			        var str = document.getElementById('httpbinString').value;
+					req.setRequestHeader('Content-Type', 'application/json');
+					req.open("POST", "http://httpbin.org/post" + str , true);    
+			        } 
+					
+			  
+			        req.send(null);
+			        req.addEventListener('load',function(){{
+				        if (req.status >= 200 && req.status < 400) {
+				            var response = JSON.parse(req.responseText);
+				            console.log(response);
+				            document.getElementById('httpbinOutput').textContent = response.data;	
 						}
 						else {
 				            console.log("Error in network request: " + req.statusText);
@@ -70,19 +94,29 @@
 	  </style>
     </head>
     <body>
-	  <p>Enter a city or zip code:</p>
+	  <p>Enter a city or zip code and country code, e.g. "Portland,us" , "90210,us":</p>
 	  
 	  <form>
       <fieldset id="field_set">
         <legend>Weather by City/zip code</legend>
-        <label for="location">enter: city/zip,country-code"></label>
+        <label for="location">city/zip,cc</label>
 		<input type="text" name="city" id="location">
         <input type="submit" id="submitLocation">
       </fieldset>
-    </form>
+      </form>
 	
 	<br>
 	
+	  <form>
+      <fieldset id="field_set">
+        <legend>submit POST to http://httpbin.org/post.</legend>
+        <label for="httpbinString">type something in:</label>
+		<input type="text" name="str" id="httpbinString">
+        <input type="submit" id="submitString">
+      </fieldset>
+      </form>
+	
+	  
 	  <table>
 		<caption id="cap">The weather in...</caption>
 		<!--
@@ -112,5 +146,9 @@
 		  </tr>
 		</tbody>
 		</table>
+		
+		<br>
+		
+		<div id="httpbinOutput">Return value from www.httpbin.org/POST:<div>
 	</body>
   </html>
