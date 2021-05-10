@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8">
+	    <script>
+		    var apiKey = "b2342c6e5bfbc952b6ed90ae30cd2443";
+		    document.addEventListener('DOMContentLoaded', bindButtons);
+		  
+		    function bindButtons(){
+			
+			    document.getElementById('submitLocation').addEventListener('click', function(event) {
+			        var req = new XMLHttpRequest();
+			        var location = document.getElementById('location').value;
+			  
+			        // check if the query is a zip code:
+			        if (Number.isInteger(location.substring(0))) {
+			            var zip = location.substring(0, location.length-3);   //submit data without comma and country code
+			            req.open("GET", "http://api.openweathermap.org/data/2.5/weather?zip=$" + zip + ",us&appid=" + apiKey + "&units=imperial", true);    
+			        } 
+					else {
+					    var city = location    //.substring(0, location.length-3);
+						req.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + city + ",us" + "&appid=" + apiKey + "&units=imperial" , true);
+		            }
+			  
+			        req.send(null);
+			        req.addEventListener('load',function(){{
+				        if (req.status >= 200 && req.status < 400) {
+				            var response = JSON.parse(req.responseText);
+				            console.log(response);
+				            document.getElementById('temp').textContent = response.main.temp;
+							document.getElementById('windSpeed').textContent = response.wind.speed;
+							document.getElementById('windDirection').textContent = response.wind.deg + " degrees (angle)";
+						
+							if (typeof city !== 'undefined') {
+                                document.getElementById('cap').textContent = "The weather in ... " + city;
+				            } else {
+							    document.getElementById('cap').textContent = "The weather in ... " + zip;  
+						    }
+						}
+						else {
+				            console.log("Error in network request: " + req.statusText);
+			            }
+				    }});
+					event.preventDefault();
+				});
+				
+				
+	            
+		    }
+	         
+		</script>
+		
+      <title>baucusr A5 AJAX/API</title>
+	  <style>
+	    caption, th, td, fieldset {
+		      border-style: solid;
+		      padding: 5px;
+	    }
+		body {
+		    background-color: rebeccapurple;
+		}
+		#field_set{
+            border: 3px #000000 solid;
+			display: inline;
+        }​
+		#location,submitLocation {
+			background-color: rebeccapurple;
+		}
+		
+	  </style>
+    </head>
+    <body>
+	  <p>Enter a city or zip code:</p>
+	  
+	  <form>
+      <fieldset id="field_set">
+        <legend>Weather by City/zip code</legend>
+        <label for="location">enter: city/zip,country-code"></label>
+		<input type="text" name="city" id="location">
+        <input type="submit" id="submitLocation">
+      </fieldset>
+    </form>
+	
+	<br>
+	
+	  <table>
+		<caption id="cap">The weather in...</caption>
+		<!--
+		<thead>
+		
+		  <tr>
+			<th>info type</th>
+			<th>value</th>
+		  </tr>
+		</thead>
+		-->
+		<tbody>
+		<!-- R1 -->
+		  <tr>
+			<th>temperature</th>
+			<td id="temp">not loaded yet</td>
+		  </tr>
+		<!-- row 2 -->  
+		  <tr>
+			<th>wind speed</th>
+			<td id="windSpeed">not loaded yet</td>
+		  </tr>
+		<!-- row 3 -->
+		  <tr>
+		    <th>wind direction</th>
+			<td id="windDirection">not loaded yet</td>
+		  </tr>
+		</tbody>
+		</table>
+	</body>
+  </html>
